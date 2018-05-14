@@ -10,37 +10,36 @@ using std::endl;
 using std::max;
 using std::vector;
 
+// In id we will store identifier of of a table, or a symlink
 struct DisjointSetsElement {
-    int id, size, parent, rank;
+    int size, parent, rank;
     
-    DisjointSetsElement(int id = 0, int size = 0, int parent = -1, int rank = 0):
-        id(id), size(size), parent(parent), rank(rank) {}
+    DisjointSetsElement(int size = 0, int parent = -1, int rank = 0):
+        size(size), parent(parent), rank(rank) {}
 };
+
+using set = DisjointSetsElement;
 
 struct DisjointSets {
     int size;
     int max_table_size;
-    vector<DisjointSetsElement> sets;
-
-    DisjointSets(int size): size(size), max_table_size(0) {
-        sets.resize(size);
-
+    vector<set> sets;
+    
+    DisjointSets(int size): size(size), max_table_size(0), sets(size) {
         for (int i = 0; i < size; i++) {
-            auto element = DisjointSetsElement(i, 0, -1, 0);
-            sets[i] = element;
+            sets[i].parent = i;
         }
     }
 
     int getParent(int table) {
-        auto& element = sets[table];
+        set& element = sets[table];
 
-        while (element.parent != -1) {
-            auto& parent = sets[element.parent];
-            element.parent = parent.parent;
-            element = parent;
+        if (element.parent != table) {
+            int root = getParent(element.parent);
+            element.parent = root;
         }
 
-        return element.id;
+        return element.parent;
     }
 
     void merge(int destination, int source) {
@@ -48,10 +47,10 @@ struct DisjointSets {
         int realSource = getParent(source);
         
         if (realDestination != realSource) {
-            auto& dest_node = sets[realDestination];
-            auto& source_node = sets[realSource];
+            set& dest_node = sets[realDestination];
+            set& source_node = sets[realSource];
 
-            if (dest_node.rank < source_node.rank) {
+            if (dest_node.rank > source_node.rank) {
                 source_node.parent = realDestination;
                 dest_node.size += source_node.size;
                 source_node.size = 0;
@@ -66,6 +65,7 @@ struct DisjointSets {
 
                 max_table_size = max(max_table_size, dest_node.size);
             } else { 
+                // Destination should be merged into Source
                 dest_node.parent = realSource;
                 source_node.size += dest_node.size;
                 dest_node.size = 0;
@@ -93,7 +93,7 @@ int main() {
                 --source;
         
         tables.merge(destination, source);
-            cout << tables.max_table_size << endl;
+        cout << tables.max_table_size << endl;
     }
 
     return 0;
