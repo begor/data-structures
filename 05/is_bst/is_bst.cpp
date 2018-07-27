@@ -7,7 +7,6 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-
 struct Node {
   int key;
   int left;
@@ -17,37 +16,33 @@ struct Node {
   Node(int key_, int left_, int right_) : key(key_), left(left_), right(right_) {}
 };
 
-void in_order_recursive(const Node& n, const vector<Node>& tree, vector<int>& result) {
-  int left_child = n.left;
-  if (left_child != -1) {
-    in_order_recursive(tree.at(left_child), tree, result);
+using prev_valid = std::pair<const Node&, bool>;
+
+bool is_bst(const Node& n, const vector<Node>& tree, long long low, long long hi) {
+  if (n.left != -1) {
+    if (!is_bst(tree.at(n.left), tree, low, n.key)) {
+      return false;
+    }
   }
 
-  result.push_back(n.key);
-
-  int right_child = n.right;
-  if (right_child != -1) {
-    in_order_recursive(tree.at(right_child), tree, result);
+  if (n.key <= low || n.key >= hi) {
+    return false;
   }
-}
 
-vector<int> in_order(const Node& root, const vector<Node>& tree) {
-  vector<int> result;
-  in_order_recursive(root, tree, result);
-  return result;
+  if (n.right != -1) {
+    if (!is_bst(tree.at(n.right), tree, n.key, hi)) {
+      return false;
+    }
+  }
+  return true;
 }
-
 
 bool IsBinarySearchTree(const vector<Node>& tree) {
   if (tree.empty()) {
     return true;
   }
-  
-  const Node& root = tree.at(0);
 
-  auto in_order_keys = in_order(root, tree);
-
-  return std::is_sorted(in_order_keys.begin(), in_order_keys.end());
+  return is_bst(tree.at(0), tree, -1000000000000000, 1000000000000000);
 }
 
 int main() {
@@ -66,3 +61,4 @@ int main() {
   }
   return 0;
 }
+ 
