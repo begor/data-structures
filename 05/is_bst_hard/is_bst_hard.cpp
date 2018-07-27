@@ -24,11 +24,11 @@ bool is_bst(const vector<Node>& tree, ll node, ll min, ll max) {
     return true;
   }
 
-  if(tree[node].key <= min || tree[node].key >= max ) {
+  if(tree[node].key < min || tree[node].key > max ) {
     return false;
   }
 
-  return is_bst(tree, tree[node].left, min, tree[node].key) && 
+  return is_bst(tree, tree[node].left, min, (tree[node].key - 1)) && 
          is_bst(tree, tree[node].right, tree[node].key, max);
 }
 
